@@ -160,7 +160,7 @@ public class TouchView extends View {
                     val = y + x;
                 }
                 else if (x + y > 0) {
-                    val = 0;
+                    val = -x - y;
                 }
             }
             else if (x < 0) {
@@ -168,10 +168,11 @@ public class TouchView extends View {
                     val = y;
                 }
                 else if (x - y < 0) {
-                    val = 0;
+                    val = -x + (2 * y);
                 }
             }
         }
+
         fromHigh -= fromLow - toLow;
         fromLow -= fromLow - toLow;
 
