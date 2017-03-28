@@ -20,6 +20,7 @@ public class TouchView extends View {
     private float centerX;
     MyBluetoothService mService;
     TextView textView, textView2;
+    static int buffer = 50;
 
     Paint drawPaint;
     private Path path = new Path();
@@ -134,10 +135,30 @@ public class TouchView extends View {
         mService = service;
     }
 
-    private int mapTouchToTracks(int x, int y) {
-        int val = 0;
-        int toLow = 0, toHigh = 14;
-        int fromLow = -this.getWidth() / 2, fromHigh = this.getWidth() / 2;
+    private int mapTouchToTracks(float x, float y) {
+        float val = 0;
+        float toLow = 0, toHigh = 14;
+        float fromLow = -((this.getWidth() / 2) - buffer), fromHigh = (this.getWidth() / 2) - buffer;
+
+        if (x > 0){
+            if (x - buffer < 0)
+                x = 0;
+            else x -= buffer;
+        }else{
+            if (x + buffer > 0)
+                x = 0;
+            else x += buffer;
+        }
+
+        if (y > 0){
+            if (y - buffer < 0)
+                y = 0;
+            else y -= buffer;
+        }else{
+            if (y + buffer > 0)
+                y = 0;
+            else y += buffer;
+        }
 
         if(x == 0)
             val = y;
@@ -176,11 +197,11 @@ public class TouchView extends View {
         fromHigh -= fromLow - toLow;
         fromLow -= fromLow - toLow;
 
-        float coeff = (((float) (toHigh-toLow)) / ((float) (fromLow-fromHigh)));
+        float coeff = (toHigh-toLow) / (fromLow-fromHigh);
         float temp = val;
 
-        val = Math.round(temp * coeff);
+        val = temp * coeff;
 
-        return -val;
+        return -Math.round(val);
     }
 }
