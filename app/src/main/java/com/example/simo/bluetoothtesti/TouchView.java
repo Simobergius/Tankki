@@ -19,8 +19,6 @@ public class TouchView extends View {
     private float centerY;
     private float centerX;
     MyBluetoothService mService;
-    TextView textView, textView2;
-    static int buffer = 50;
 
     Paint drawPaint;
     private Path path = new Path();
@@ -59,9 +57,8 @@ public class TouchView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        int right, left;
         int fromLow = 0, fromHigh = this.getWidth();
-        String str;
+
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
                 path.moveTo(centerX, centerY);
@@ -75,15 +72,8 @@ public class TouchView extends View {
                 if (y < fromLow)
                     y = fromLow;
                 path.lineTo(x, y);
-                right = mapTouchToTracks(Math.round(x - centerX), Math.round(centerY - y)) + 7;
-                left = mapTouchToTracks(-Math.round(x - centerX), Math.round(centerY - y)) + 7;
-                str = "Vasen: ";
-                str += Integer.toString(left);
-                str += "\tOikea: ";
-                str += Integer.toString(right);
-                textView.setText(str);
                 if (mService != null) {
-                    mService.setValues(right, left);
+                    mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -102,20 +92,13 @@ public class TouchView extends View {
                 path.lineTo(x, y);
                 //Right track = f(x, y)
                 //Left track = f(-x, y)
-                right = mapTouchToTracks(Math.round(x - centerX), Math.round(centerY - y)) + 7;
-                left = mapTouchToTracks(-Math.round(x - centerX), Math.round(centerY - y)) + 7;
-                str = "Vasen: ";
-                str += Integer.toString(left);
-                str += "\tOikea: ";
-                str += Integer.toString(right);
-                textView.setText(str);
                 if (mService != null) {
-                    mService.setValues(right, left);
+                    mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if (mService != null) {
-                    mService.setValues(mapTouchToTracks(0, 0) + 7, mapTouchToTracks(0, 0) + 7);
+                    mService.setValues(0, 0, fromLow, fromHigh);
                 }
                 path.reset();
                 break;
@@ -126,82 +109,7 @@ public class TouchView extends View {
         return true;
     }
 
-    public void setTextView(TextView tw, TextView tw2) {
-        textView = tw;
-        textView2 = tw2;
-    }
-
     public void setService (MyBluetoothService service) {
         mService = service;
-    }
-
-    private int mapTouchToTracks(float x, float y) {
-        float val = 0;
-        float toLow = 0, toHigh = 14;
-        float fromLow = -((this.getWidth() / 2) - buffer), fromHigh = (this.getWidth() / 2) - buffer;
-
-        if (x > 0){
-            if (x - buffer < 0)
-                x = 0;
-            else x -= buffer;
-        }else{
-            if (x + buffer > 0)
-                x = 0;
-            else x += buffer;
-        }
-
-        if (y > 0){
-            if (y - buffer < 0)
-                y = 0;
-            else y -= buffer;
-        }else{
-            if (y + buffer > 0)
-                y = 0;
-            else y += buffer;
-        }
-
-        if(x == 0)
-            val = y;
-        if(y == 0)
-            val = -x;
-
-        if (y > 0) {
-            if (x > 0)
-                val = y - x;
-            else if (x < 0) {
-                if (Math.abs(x) >= Math.abs(y))
-                    val = Math.abs(x);
-                else if (Math.abs(x) < Math.abs(y))
-                    val = Math.abs(y);
-            }
-        }
-        else if (y < 0) {
-            if (x > 0) {
-                if (x + y <= 0) {
-                    val = y + x;
-                }
-                else if (x + y > 0) {
-                    val = -x - y;
-                }
-            }
-            else if (x < 0) {
-                if (x - y >= 0) {
-                    val = y;
-                }
-                else if (x - y < 0) {
-                    val = -x + (2 * y);
-                }
-            }
-        }
-
-        fromHigh -= fromLow - toLow;
-        fromLow -= fromLow - toLow;
-
-        float coeff = (toHigh-toLow) / (fromLow-fromHigh);
-        float temp = val;
-
-        val = temp * coeff;
-
-        return -Math.round(val);
     }
 }

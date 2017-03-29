@@ -2,6 +2,7 @@ package com.example.simo.bluetoothtesti;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,6 +16,7 @@ import java.util.TimerTask;
 class MyBluetoothService {
     private static final String TAG = "MY_APP_DEBUG_TAG";
     private ConnectedThread cnt;
+    private static int buffer = 50;
 
     MyBluetoothService(BluetoothSocket socket) {
         cnt = new ConnectedThread(socket);
@@ -29,17 +31,26 @@ class MyBluetoothService {
         cnt.cancel();
     }
 
-    void setValues(int right, int left) {
-        cnt.right = right;
-        cnt.left = left;
+    void setValues(float x, float y, float low, float high) {
+        cnt.x = x;
+        cnt.y = y;
+        cnt.fromLow = low + buffer;
+        cnt.fromHigh = high - buffer;
+    }
+
+    void setTextView(TextView tw, TextView tw2) {
+        cnt.textView = tw;
+        cnt.textView2 = tw2;
     }
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final OutputStream mmOutStream;
+        private TextView textView, textView2;
         Timer timer;
         TimerTask timerTask;
-        int right = 7, left = 7;
+        float x = 0, y = 0;
+        float fromLow = -1, fromHigh = 1;
 
         ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -88,7 +99,11 @@ class MyBluetoothService {
             timerTask = new TimerTask() {
                 @Override
                 public void run() {
-                    int cmd = right * 15 + left;
+                    int vasen = mapTouchToTracks(-x, y);
+                    int oikea = mapTouchToTracks(x, y);
+                    String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
+                    //textView.setText(str);
+                    int cmd = oikea * 15 + vasen;
                     write((byte) cmd);
                 }
             };
@@ -99,6 +114,61 @@ class MyBluetoothService {
                 timer.cancel();
                 timer = null;
             }
+        }
+
+        private int mapTouchToTracks(float x, float y) {
+            float val = 0;
+            float toLow = 0, toHigh = 14;
+
+            if (x > 0){
+                if (x - buffer < 0) {
+                    x = 0;
+                } else x -= buffer;
+            }else{
+                if (x + buffer > 0) {
+                    x = 0;
+                } else x += buffer;
+            }
+
+            if (y > 0){
+                if (y - buffer < 0)
+                    y = 0;
+                else y -= buffer;
+            }else{
+                if (y + buffer > 0)
+                    y = 0;
+                else y += buffer;
+            }
+
+            if (y <= 0) {
+                if (x > 0) {
+                    val = - y - x;
+                } else if (x <= 0) {
+                    if (Math.abs(x) >= Math.abs(y)) {
+                        val = Math.abs(x);
+                    } else if (Math.abs(x) < Math.abs(y)) {
+                        val = Math.abs(y);
+                    }
+                }
+            }else if (y > 0) {
+                if (x > 0) {
+                    if (x > y ) {
+                        val = y - x;
+                    } else if (x < y) {
+                        val = x - y;
+                    }
+                } else if (x <= 0) {
+                    if (x <= y) {
+                        val = -y;
+                    } else if (x > y) {
+                        val = -(x + 2 * y);
+                    }
+                }
+            }
+
+            val = (val - fromLow) * (toHigh-toLow) / (fromHigh-fromLow) + toLow;
+
+            return Math.round(val);
         }
     }
 }

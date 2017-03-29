@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ((TouchView) findViewById(R.id.TouchView)).setTextView((TextView) findViewById(R.id.textView2), (TextView) findViewById(R.id.textView3));
 
 
         if (!mBluetoothAdapter.isEnabled()) {
@@ -68,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                             touchView.setService(mService);
                             oStream = mService.getOutputStream();
                             constraintLayout.removeView(findViewById(R.id.ScrollView));
+                            mService.setTextView((TextView) findViewById(R.id.textView2), (TextView) findViewById(R.id.textView3));
                         }
                     });
 
