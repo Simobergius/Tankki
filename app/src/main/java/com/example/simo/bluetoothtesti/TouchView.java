@@ -98,7 +98,7 @@ public class TouchView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mService != null) {
-                    mService.setValues(0, 0, fromLow, fromHigh);
+                    mService.setValues(0, 0, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
                 path.reset();
                 break;

@@ -103,8 +103,11 @@ class MyBluetoothService {
                     int oikea = mapTouchToTracks(x, y);
                     String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
                     //textView.setText(str);
-                    int cmd = oikea * 15 + vasen;
-                    write((byte) cmd);
+                    int[] cmd = { 1, 2, 3, (byte) oikea, (byte) vasen, 4 };
+                    for (int i = 0; i < 6; i++) {
+                        write((byte) cmd[i]);
+                    }
+
                 }
             };
         }
@@ -118,7 +121,7 @@ class MyBluetoothService {
 
         private int mapTouchToTracks(float x, float y) {
             float val = 0;
-            float toLow = 0, toHigh = 14;
+            float toLow = 0, toHigh = 254;
 
             if (x > 0){
                 if (x - buffer < 0) {
