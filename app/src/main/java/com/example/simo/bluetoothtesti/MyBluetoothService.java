@@ -85,6 +85,7 @@ class MyBluetoothService {
         void cancel() {
             try {
                 mmSocket.close();
+                vibrator.cancel();
                 stopTimerTask();
             } catch (IOException e) {
                 Log.e(TAG, "Could not close the connect socket", e);
@@ -109,7 +110,14 @@ class MyBluetoothService {
                     int oikea = mapTouchToTracks(x, y);
                     String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
                     //textView.setText(str);
-                    long n =  Math.round((Math.abs(y) - 0) * (50-10) / (fromHigh-fromLow) + 10);
+                    long n = 0;
+                    if (Math.abs(x) >= Math.abs(y))
+                        n = Math.round((Math.abs(x) - 0) * (50) / (fromHigh-fromLow));
+                    else if(Math.abs(x) < Math.abs(y))
+                        n = Math.round((Math.abs(y) - 0) * (50) / (fromHigh-fromLow));
+                    else if(x == 0 && y == 0)
+                        vibrator.cancel();
+
                     long[] pattern = {50 - n, n};
                     vibrator.vibrate(pattern, 0);
                     int[] cmd = { 1, 2, 3, (byte) oikea, (byte) vasen, 4 };
