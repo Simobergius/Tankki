@@ -3,6 +3,7 @@
     package="com.example.simo.bluetoothtesti">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 
     <application
         android:allowBackup="true"

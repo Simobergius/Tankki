@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,13 @@ public class MainActivity extends AppCompatActivity {
     ConnectThread cnt;
     MyBluetoothService mService;
     OutputStream oStream;
+    Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
 
 
         if (!mBluetoothAdapter.isEnabled()) {
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                             touchView.setService(mService);
                             oStream = mService.getOutputStream();
                             constraintLayout.removeView(findViewById(R.id.ScrollView));
-                            mService.setTextView((TextView) findViewById(R.id.textView2), (TextView) findViewById(R.id.textView3));
+                            mService.setTextView((TextView) findViewById(R.id.textView2), (TextView) findViewById(R.id.textView3), vibrator);
                         }
                     });
 

@@ -1,6 +1,7 @@
 package com.example.simo.bluetoothtesti;
 
 import android.bluetooth.BluetoothSocket;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -16,7 +17,8 @@ import java.util.TimerTask;
 class MyBluetoothService {
     private static final String TAG = "MY_APP_DEBUG_TAG";
     private ConnectedThread cnt;
-    private static int buffer = 50;
+    private static int buffer = 30;
+    Vibrator vibrator;
 
     MyBluetoothService(BluetoothSocket socket) {
         cnt = new ConnectedThread(socket);
@@ -38,9 +40,10 @@ class MyBluetoothService {
         cnt.fromHigh = high - buffer;
     }
 
-    void setTextView(TextView tw, TextView tw2) {
+    void setTextView(TextView tw, TextView tw2, Vibrator vibrator) {
         cnt.textView = tw;
         cnt.textView2 = tw2;
+        cnt.vibrator = vibrator;
     }
 
     private class ConnectedThread extends Thread {
@@ -51,6 +54,7 @@ class MyBluetoothService {
         TimerTask timerTask;
         float x = 0, y = 0;
         float fromLow = -1, fromHigh = 1;
+        Vibrator vibrator;
 
         ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -99,10 +103,15 @@ class MyBluetoothService {
             timerTask = new TimerTask() {
                 @Override
                 public void run() {
+                    //Right track = f(x, y)
+                    //Left track = f(-x, y)
                     int vasen = mapTouchToTracks(-x, y);
                     int oikea = mapTouchToTracks(x, y);
                     String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
                     //textView.setText(str);
+                    long n =  Math.round((Math.abs(y) - 0) * (50-10) / (fromHigh-fromLow) + 10);
+                    long[] pattern = {50 - n, n};
+                    vibrator.vibrate(pattern, 0);
                     int[] cmd = { 1, 2, 3, (byte) oikea, (byte) vasen, 4 };
                     for (int i = 0; i < 6; i++) {
                         write((byte) cmd[i]);
