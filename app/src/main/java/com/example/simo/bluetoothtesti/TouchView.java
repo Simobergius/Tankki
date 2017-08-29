@@ -12,6 +12,7 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 public class TouchView extends View {
 
@@ -21,6 +22,8 @@ public class TouchView extends View {
 
     Paint drawPaint;
     private Path path = new Path();
+
+    TextView text;
 
     public TouchView(Context context) {
         super(context);
@@ -71,7 +74,9 @@ public class TouchView extends View {
                 if (y < fromLow)
                     y = fromLow;
                 path.lineTo(x, y);
+                text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
                 if (mService != null) {
+                    // Parameters for setValues: x, y, low, high
                     mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
                 return true;
@@ -89,6 +94,8 @@ public class TouchView extends View {
                 if (y < fromLow)
                     y = fromLow;
                 path.lineTo(x, y);
+                text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
+
                 //Right track = f(x, y)
                 //Left track = f(-x, y)
                 if (mService != null) {
@@ -100,6 +107,7 @@ public class TouchView extends View {
                     mService.setValues(0, 0, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
                 path.reset();
+                text.setText("X: " + 0 + "\nY: " + 0 +"\nDiff X: " + 0 + "\nDiff Y: " + 0);
                 break;
             default:
                 path.reset();
@@ -111,4 +119,8 @@ public class TouchView extends View {
     public void setService (MyBluetoothService service) {
         mService = service;
     }
+
+    public void setTextView (TextView tw) {
+        text = tw;
+        text.setText("Im Alive!");}
 }

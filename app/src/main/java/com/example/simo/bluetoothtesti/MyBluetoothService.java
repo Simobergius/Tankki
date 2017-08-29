@@ -49,7 +49,7 @@ class MyBluetoothService {
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final OutputStream mmOutStream;
-        private TextView textView, textView2;
+        TextView textView, textView2;
         Timer timer;
         TimerTask timerTask;
         float x = 0, y = 0;
@@ -107,9 +107,11 @@ class MyBluetoothService {
                     //Right track = f(x, y)
                     //Left track = f(-x, y)
                     int vasen = mapTouchToTracks(-x, y);
-                    int oikea = mapTouchToTracks(x, y);
-                    String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
-                    //textView.setText(str);
+                    int oikea = mapTouchToTracks(x, y); String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
+                    //textView.setText("Im Alive!");
+                    //textView.setText("Oikea: " + Integer.toString(oikea) + "\n Vasen: " + Integer.toString(vasen));
+
+                    // Vibrate according to higher value
                     long n = 0;
                     if (Math.abs(x) >= Math.abs(y))
                         n = Math.round((Math.abs(x) - 0) * (50) / (fromHigh-fromLow));

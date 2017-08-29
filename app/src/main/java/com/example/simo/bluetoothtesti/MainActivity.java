@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     MyBluetoothService mService;
     OutputStream oStream;
     Vibrator vibrator;
+    TouchView touchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
         }
+
+        touchView = (TouchView) findViewById(R.id.TouchView);
+        touchView.setTextView((TextView) findViewById(R.id.textView6));
     }
 
     public void queryBtPaired(View view) {
@@ -66,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
                             cnt.run();
 
                             mService = cnt.getBluetoothService();
-                            TouchView touchView = (TouchView) findViewById(R.id.TouchView);
                             touchView.setService(mService);
                             oStream = mService.getOutputStream();
                             constraintLayout.removeView(findViewById(R.id.ScrollView));
