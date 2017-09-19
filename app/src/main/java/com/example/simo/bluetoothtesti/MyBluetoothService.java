@@ -10,6 +10,9 @@ import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 /**
  * Created by Simo on 24.3.2017.
  */
@@ -33,11 +36,11 @@ class MyBluetoothService {
         cnt.cancel();
     }
 
-    void setValues(float x, float y, float low, float high) {
+    void setValues(double x, double y, float lowY, float highY) {
         cnt.x = x;
         cnt.y = y;
-        cnt.fromLow = low + buffer;
-        cnt.fromHigh = high - buffer;
+        cnt.fromLow = lowY;
+        cnt.fromHigh = highY;
     }
 
     void setTextView(TextView tw, TextView tw2, Vibrator vibrator) {
@@ -52,7 +55,7 @@ class MyBluetoothService {
         TextView textView, textView2;
         Timer timer;
         TimerTask timerTask;
-        float x = 0, y = 0;
+        double x = 0, y = 0;
         float fromLow = -1, fromHigh = 1;
         Vibrator vibrator;
 
@@ -106,22 +109,11 @@ class MyBluetoothService {
                 public void run() {
                     //Right track = f(x, y)
                     //Left track = f(-x, y)
-                    int vasen = mapTouchToTracks(-x, y);
-                    int oikea = mapTouchToTracks(x, y); String str = "Oikea: " + Integer.toString(oikea) + " Vasen: " + Integer.toString(vasen);
+                    long vasen = mapTouchToTracks(-x, y);
+                    long oikea = mapTouchToTracks(x, y);
                     //textView.setText("Im Alive!");
                     //textView.setText("Oikea: " + Integer.toString(oikea) + "\n Vasen: " + Integer.toString(vasen));
 
-                    // Vibrate according to higher value
-                    long n = 0;
-                    if (Math.abs(x) >= Math.abs(y))
-                        n = Math.round((Math.abs(x) - 0) * (50) / (fromHigh-fromLow));
-                    else if(Math.abs(x) < Math.abs(y))
-                        n = Math.round((Math.abs(y) - 0) * (50) / (fromHigh-fromLow));
-                    else if(x == 0 && y == 0)
-                        vibrator.cancel();
-
-                    long[] pattern = {50 - n, n};
-                    vibrator.vibrate(pattern, 0);
                     int[] cmd = { 1, 2, 3, (byte) oikea, (byte) vasen, 4 };
                     for (int i = 0; i < 6; i++) {
                         write((byte) cmd[i]);
@@ -138,9 +130,14 @@ class MyBluetoothService {
             }
         }
 
-        private int mapTouchToTracks(float x, float y) {
-            float val = 0;
-            float toLow = 0, toHigh = 254;
+        private long mapTouchToTracks(double x, double y) {
+            double val = 0;
+            double toLow = 0, toHigh = 254;
+
+            if(x >= 0)
+                x *= delinearise(x / fromHigh, 10);
+            else
+                x *= delinearise(-(x / fromHigh), 10);
 
             if (x > 0){
                 if (x - buffer < 0) {
@@ -192,5 +189,31 @@ class MyBluetoothService {
 
             return Math.round(val);
         }
+
+        private double delinearise(double x, int y)
+        {
+            double offsetX;
+            double offsetY;
+
+            if (y > 0)
+            {
+                offsetX = ((sqrt(y * 2 - 1) - 1) / 2);
+                offsetY = ((sqrt(y * 2 - 1) / 2) + 0.5);
+                return -(sqrt(y - (pow(x + offsetX, 2) ) ) ) + offsetY ;
+            }
+
+            if (y < 0)
+            {
+                y = -y;
+                offsetX = (-(sqrt(y * 2 - 1) + 1 ) / 2);
+                offsetY = (-(sqrt(y * 2 - 1) - 1 ) / 2);
+                return sqrt(y - (pow(x + offsetX, 2))) + offsetY;
+
+            }
+
+            return x;
+        }
+
+
     }
 }

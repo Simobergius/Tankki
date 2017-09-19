@@ -57,24 +57,25 @@ public class TouchView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
-        int fromLow = 0, fromHigh = this.getWidth();
+        double x = event.getX();
+        double y = event.getY();
 
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                path.moveTo(centerX, centerY);
 
-                if (x > fromHigh)
-                    x = fromHigh;
-                if (x < fromLow)
-                    x = fromLow;
-                if (y > fromHigh)
-                    y = fromHigh;
-                if (y < fromLow)
-                    y = fromLow;
-                path.lineTo(x, y);
+                if(x < 0)
+                    x = 0;
+                if (x > this.getWidth())
+                    x = this.getWidth();
+                if(y < 0)
+                    y = 0;
+                if (y > this.getWidth())
+                    y = this.getWidth();
+
+                path.moveTo(centerX, centerY);
+                path.lineTo((float) x, (float) y);
                 text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
+
                 if (mService != null) {
                     // Parameters for setValues: x, y, low, high
                     mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
@@ -82,22 +83,21 @@ public class TouchView extends View {
                 return true;
             case MotionEvent.ACTION_MOVE:
 
+                if(x < 0)
+                    x = 0;
+                if (x > this.getWidth())
+                    x = this.getWidth();
+                if(y < 0)
+                    y = 0;
+                if (y > this.getWidth())
+                    y = this.getWidth();
+
                 path.reset();
                 path.moveTo(centerX, centerY);
 
-                if (x > fromHigh)
-                    x = fromHigh;
-                if (x < fromLow)
-                    x = fromLow;
-                if (y > fromHigh)
-                    y = fromHigh;
-                if (y < fromLow)
-                    y = fromLow;
-                path.lineTo(x, y);
+                path.lineTo((float) x, (float) y);
                 text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
 
-                //Right track = f(x, y)
-                //Left track = f(-x, y)
                 if (mService != null) {
                     mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
                 }
