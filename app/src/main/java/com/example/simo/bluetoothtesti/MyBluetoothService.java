@@ -134,10 +134,13 @@ class MyBluetoothService {
             double val = 0;
             double toLow = 0, toHigh = 254;
 
+            // the delinearise function makes the x-coordinate of the touch not linearly relative to the amount of turning
+            // so the turn-response of the tank is not linear, but still makes use of the full degree of movement
+            // so a touch on the max still causes max turning, but the amount in between is adjusted to theoretically turn more smoothly
             if(x >= 0)
-                x *= delinearise(x / fromHigh, 10);
+                x *= delinearise(x / fromHigh, 20);
             else
-                x *= delinearise(-(x / fromHigh), 10);
+                x *= delinearise(-(x / fromHigh), 20);
 
             if (x > 0){
                 if (x - buffer < 0) {
@@ -191,6 +194,9 @@ class MyBluetoothService {
         }
 
         private double delinearise(double x, int y)
+        // return a number that is taken from a segment of a circle of radius y, where the circle periphery goes through the origin and x = 1, y = 1
+        // y -value means the amount of linearity, x is the ratio of current number to the max value of that number
+        // infinity y is the same as a perfect line, 0 y is the same as a circle of radius 1
         {
             double offsetX;
             double offsetY;
@@ -212,6 +218,7 @@ class MyBluetoothService {
             }
 
             return x;
+
         }
 
 
