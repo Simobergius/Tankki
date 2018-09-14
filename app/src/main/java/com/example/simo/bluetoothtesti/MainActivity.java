@@ -4,30 +4,29 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
-import java.io.OutputStream;
 import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     ConnectThread cnt;
     MyBluetoothService mService;
-    OutputStream oStream;
-    Vibrator vibrator;
-    TouchView touchView;
+    TouchView touchViewMovement, touchViewTurret;
+    Button fireButton, mgButton;
+    ToggleButton laserButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
 
 
         if (!mBluetoothAdapter.isEnabled()) {
@@ -37,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        touchView = (TouchView) findViewById(R.id.TouchView);
-        touchView.setTextView((TextView) findViewById(R.id.textView6));
+        touchViewMovement = (TouchView) findViewById(R.id.TouchViewMovement);
+        touchViewTurret = (TouchView) findViewById(R.id.TouchViewTurret);
+        laserButton = (ToggleButton) findViewById(R.id.LaserToggleButton);
+        fireButton = (Button) findViewById(R.id.FireButton);
+        mgButton = (Button) findViewById(R.id.MGButton);
+
     }
 
     public void queryBtPaired(View view) {
@@ -70,10 +73,33 @@ public class MainActivity extends AppCompatActivity {
                             cnt.run();
 
                             mService = cnt.getBluetoothService();
-                            touchView.setService(mService);
-                            oStream = mService.getOutputStream();
+                            touchViewMovement.setService(mService);
+                            touchViewTurret.setService(mService);
                             constraintLayout.removeView(findViewById(R.id.ScrollView));
-                            mService.setTextView((TextView) findViewById(R.id.textView2), (TextView) findViewById(R.id.textView3), vibrator);
+                            fireButton.setOnTouchListener(new View.OnTouchListener() {
+                                @Override
+                                public boolean onTouch(View v, MotionEvent event) {
+                                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                                        mService.setAmpu(true);
+                                    }else if(event.getAction() == MotionEvent.ACTION_CANCEL
+                                            || event.getAction() == MotionEvent.ACTION_UP){
+                                        mService.setAmpu(false);
+                                    }
+                                    return true;
+                                }
+                            });
+                            mgButton.setOnTouchListener(new View.OnTouchListener() {
+                                @Override
+                                public boolean onTouch(View v, MotionEvent event) {
+                                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                                            mService.setKonsu(true);
+                                    }else if(event.getAction() == MotionEvent.ACTION_CANCEL
+                                            || event.getAction() == MotionEvent.ACTION_UP){
+                                            mService.setKonsu(false);
+                                    }
+                                    return true;
+                                }
+                            });
                         }
                     });
 

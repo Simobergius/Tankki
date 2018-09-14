@@ -1,7 +1,6 @@
 package com.example.simo.bluetoothtesti;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -21,7 +20,6 @@ class MyBluetoothService {
     private static final String TAG = "MY_APP_DEBUG_TAG";
     private ConnectedThread cnt;
     private static int buffer = 30;
-    Vibrator vibrator;
 
     MyBluetoothService(BluetoothSocket socket) {
         cnt = new ConnectedThread(socket);
@@ -36,28 +34,53 @@ class MyBluetoothService {
         cnt.cancel();
     }
 
-    void setValues(double x, double y, float lowY, float highY) {
+    void setMovementValues(double x, double y, float highY) {
         cnt.x = x;
         cnt.y = y;
-        cnt.fromLow = lowY;
+        cnt.fromLow = -highY;
         cnt.fromHigh = highY;
     }
 
-    void setTextView(TextView tw, TextView tw2, Vibrator vibrator) {
-        cnt.textView = tw;
-        cnt.textView2 = tw2;
-        cnt.vibrator = vibrator;
+    void setTurretValues(double x, double y, float highX, float highY) {
+        cnt.elevation = y;
+        cnt.rotation = x;
+        cnt.maxElevation = highY;
+        cnt.maxRotation = highX;
+    }
+
+    void setAmpu(boolean val) {
+        if(val)
+            cnt.ampu = 2;
+        else
+            cnt.ampu = 0;
+    }
+
+    void setLaser(boolean val) {
+        if(val)
+            cnt.laser = 2;
+        else
+            cnt.laser = 0;
+    }
+
+    void setKonsu(boolean val) {
+        if(val)
+            cnt.konsu = 2;
+        else
+            cnt.konsu = 0;
     }
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final OutputStream mmOutStream;
-        TextView textView, textView2;
         Timer timer;
         TimerTask timerTask;
         double x = 0, y = 0;
         float fromLow = -1, fromHigh = 1;
-        Vibrator vibrator;
+        double elevation = 0;
+        double rotation = 0;
+        float maxElevation = 1;
+        float maxRotation = 1;
+        int konsu = 0, laser = 0, ampu = 0;
 
         ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -88,7 +111,6 @@ class MyBluetoothService {
         void cancel() {
             try {
                 mmSocket.close();
-                vibrator.cancel();
                 stopTimerTask();
             } catch (IOException e) {
                 Log.e(TAG, "Could not close the connect socket", e);
@@ -109,14 +131,14 @@ class MyBluetoothService {
                 public void run() {
                     //Right track = f(x, y)
                     //Left track = f(-x, y)
-                    long vasen = mapTouchToTracks(-x, y);
-                    long oikea = mapTouchToTracks(x, y);
-                    //textView.setText("Im Alive!");
-                    //textView.setText("Oikea: " + Integer.toString(oikea) + "\n Vasen: " + Integer.toString(vasen));
+                    int vasen = mapTouchToTracks(-x, y);
+                    int oikea = mapTouchToTracks(x, y);
+                    int elevationFinal = mapElevation();
+                    int rotationFinal = mapRotation();
 
-                    int[] cmd = { 1, 2, 3, (byte) oikea, (byte) vasen, 4 };
-                    for (int i = 0; i < 6; i++) {
-                        write((byte) cmd[i]);
+                    byte[] cmd = { 1, (byte) 255, (byte) oikea, (byte) vasen, (byte) elevationFinal, (byte) rotationFinal, (byte) ampu, (byte) laser, (byte) konsu};
+                    for (byte aCmd : cmd) {
+                        write(aCmd);
                     }
 
                 }
@@ -130,18 +152,19 @@ class MyBluetoothService {
             }
         }
 
-        private long mapTouchToTracks(double x, double y) {
+        private int mapTouchToTracks(double x, double y) {
             double val = 0;
             double toLow = 0, toHigh = 254;
 
             // the delinearise function makes the x-coordinate of the touch not linearly relative to the amount of turning
             // so the turn-response of the tank is not linear, but still makes use of the full degree of movement
-            // so a touch on the max still causes max turning, but the amount in between is adjusted to theoretically turn more smoothly
+            // so a touch on the max still causes max turning, but the amount in between is adjusted to theoretically turn more naturally
             if(x >= 0)
-                x *= delinearise(x / fromHigh, 20);
+                x *= delinearise(x / fromHigh, 30);
             else
-                x *= delinearise(-(x / fromHigh), 20);
+                x *= delinearise(-(x / fromHigh), 30);
 
+            // The following lines implement a deadzone
             if (x > 0){
                 if (x - buffer < 0) {
                     x = 0;
@@ -161,6 +184,8 @@ class MyBluetoothService {
                     y = 0;
                 else y += buffer;
             }
+
+            // Calculate the track speed factor for the position of the touch
 
             if (y <= 0) {
                 if (x > 0) {
@@ -188,9 +213,10 @@ class MyBluetoothService {
                 }
             }
 
+            // Map the value from the original range to the desired range
             val = (val - fromLow) * (toHigh-toLow) / (fromHigh-fromLow) + toLow;
 
-            return Math.round(val);
+            return (int)Math.round(val);
         }
 
         private double delinearise(double x, int y)
@@ -221,6 +247,27 @@ class MyBluetoothService {
 
         }
 
+        private int mapRotation() {
+            float fromHighRot = maxRotation;
+            float fromLowRot = -maxRotation;
+            double toLow = 0, toHigh = 254;
+            double val = rotation;
+
+            val = (val - fromLowRot) * (toHigh-toLow) / (fromHighRot-fromLowRot) + toLow;
+
+            return (int)Math.round(val);
+        }
+
+        private int mapElevation() {
+            float fromHighEle = maxElevation;
+            float fromLowEle = -maxElevation;
+            double toLow = 0, toHigh = 254;
+            double val = elevation;
+
+            val = (val - fromLowEle) * (toHigh-toLow) / (fromHighEle-fromLowEle) + toLow;
+
+            return (int)Math.round(val);
+        }
 
     }
 }

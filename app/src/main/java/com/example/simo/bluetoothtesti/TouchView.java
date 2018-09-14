@@ -19,11 +19,12 @@ public class TouchView extends View {
     private float centerY;
     private float centerX;
     MyBluetoothService mService;
+    double x;
+    double y;
+
 
     Paint drawPaint;
     private Path path = new Path();
-
-    TextView text;
 
     public TouchView(Context context) {
         super(context);
@@ -57,8 +58,8 @@ public class TouchView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        double x = event.getX();
-        double y = event.getY();
+        x = event.getX();
+        y = event.getY();
 
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
@@ -69,16 +70,14 @@ public class TouchView extends View {
                     x = this.getWidth();
                 if(y < 0)
                     y = 0;
-                if (y > this.getWidth())
-                    y = this.getWidth();
+                if (y > this.getHeight())
+                    y = this.getHeight();
 
                 path.moveTo(centerX, centerY);
                 path.lineTo((float) x, (float) y);
-                text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
 
                 if (mService != null) {
-                    // Parameters for setValues: x, y, low, high
-                    mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
+                    setValues();
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -89,27 +88,30 @@ public class TouchView extends View {
                     x = this.getWidth();
                 if(y < 0)
                     y = 0;
-                if (y > this.getWidth())
-                    y = this.getWidth();
+                if (y > this.getHeight())
+                    y = this.getHeight();
 
                 path.reset();
                 path.moveTo(centerX, centerY);
 
                 path.lineTo((float) x, (float) y);
-                text.setText("X: " + x + "\nY: " + y +"\nDiff X: " + (x - centerX) + "\nDiff Y: " + (y - centerY));
 
                 if (mService != null) {
-                    mService.setValues(x - centerX, y - centerY, -(this.getWidth() / 2), this.getWidth() / 2);
+                    setValues();
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if (mService != null) {
-                    mService.setValues(0, 0, -(this.getWidth() / 2), this.getWidth() / 2);
+                    x = 0;
+                    y = 0;
+                    setNullValues();
                 }
                 path.reset();
-                text.setText("X: " + 0 + "\nY: " + 0 +"\nDiff X: " + 0 + "\nDiff Y: " + 0);
                 break;
             default:
+                x = 0;
+                y = 0;
+                setNullValues();
                 path.reset();
         }
         invalidate();
@@ -120,7 +122,20 @@ public class TouchView extends View {
         mService = service;
     }
 
-    public void setTextView (TextView tw) {
-        text = tw;
-        text.setText("Im Alive!");}
+    private void setValues() {
+        if (getId() == R.id.TouchViewMovement) {
+            mService.setMovementValues(x - centerX, y - centerY,this.getWidth() / 2);
+        } else if(getId() == R.id.TouchViewTurret) {
+            mService.setTurretValues(x - centerX, y - centerY, this.getHeight() / 2, this.getWidth() / 2);
+        }
+    }
+
+    private void setNullValues() {
+        if (getId() == R.id.TouchViewMovement) {
+            mService.setMovementValues(0, 0,this.getWidth() / 2);
+        } else if(getId() == R.id.TouchViewTurret) {
+            mService.setTurretValues(0, 0, this.getHeight() / 2, this.getWidth() / 2);
+        }
+    }
+
 }

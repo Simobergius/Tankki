@@ -1,11 +1,15 @@
 <resources>
     <string name="app_name">Bluetooth Tankki</string>
     <string name="title_activity_main">Bluetooth Tankki</string>
-    <string name="app_button1">Paired\ndevices</string>
-    <string name="app_button2">Disconnect</string>
+    <string name="app_button_query_paired">Paired\ndevices</string>
+    <string name="app_button_disconnect">Disconnect</string>
     <string name="text_not_connected">Not Connected</string>
     <string name="text_send">Send</string>
     <string name="text_close">Close</string>
+    <string name="app_button_fire">Fire</string>
+    <string name="app_button_fire_mg">Fire MG</string>
+    <string name="app_button_laser_off">Laser off</string>>
+    <string name="app_button_laser_on">Laser on</string>
     <string name="noPairedDevices">Cannot find paired devices</string>
     <string name="socketCreateFailed">Socket\'s create() method failed</string>
     <string name="clientSocketConnectFailed">Could not close the client socket</string>
