@@ -3,6 +3,7 @@ package com.example.simo.bluetoothtesti;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,11 +26,6 @@ class MyBluetoothService {
         cnt = new ConnectedThread(socket);
     }
 
-    OutputStream getOutputStream() {
-
-        return cnt.mmOutStream;
-    }
-
     void cancel() {
         cnt.cancel();
     }
@@ -48,18 +44,15 @@ class MyBluetoothService {
         cnt.maxRotation = highX;
     }
 
+    void setLaserButton(ToggleButton lb) {
+        cnt.laserButton = lb;
+    }
+
     void setAmpu(boolean val) {
         if(val)
             cnt.ampu = 2;
         else
             cnt.ampu = 0;
-    }
-
-    void setLaser(boolean val) {
-        if(val)
-            cnt.laser = 2;
-        else
-            cnt.laser = 0;
     }
 
     void setKonsu(boolean val) {
@@ -81,6 +74,7 @@ class MyBluetoothService {
         float maxElevation = 1;
         float maxRotation = 1;
         int konsu = 0, laser = 0, ampu = 0;
+        ToggleButton laserButton;
 
         ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -135,6 +129,12 @@ class MyBluetoothService {
                     int oikea = mapTouchToTracks(x, y);
                     int elevationFinal = mapElevation();
                     int rotationFinal = mapRotation();
+
+                    if(laserButton.isChecked()){
+                        laser = 2;
+                    }else{
+                        laser = 0;
+                    }
 
                     byte[] cmd = { 1, (byte) 255, (byte) oikea, (byte) vasen, (byte) elevationFinal, (byte) rotationFinal, (byte) ampu, (byte) laser, (byte) konsu};
                     for (byte aCmd : cmd) {

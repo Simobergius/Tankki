@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                             mService = cnt.getBluetoothService();
                             touchViewMovement.setService(mService);
                             touchViewTurret.setService(mService);
+                            mService.setLaserButton(laserButton);
                             constraintLayout.removeView(findViewById(R.id.ScrollView));
                             fireButton.setOnTouchListener(new View.OnTouchListener() {
                                 @Override
