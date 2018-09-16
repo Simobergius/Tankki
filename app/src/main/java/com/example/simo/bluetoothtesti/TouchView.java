@@ -126,7 +126,7 @@ public class TouchView extends View {
         if (getId() == R.id.TouchViewMovement) {
             mService.setMovementValues(x - centerX, y - centerY,this.getWidth() / 2);
         } else if(getId() == R.id.TouchViewTurret) {
-            mService.setTurretValues(x - centerX, y - centerY, this.getHeight() / 2, this.getWidth() / 2);
+            mService.setTurretValues(x - centerX, y - centerY, this.getWidth() / 2, this.getHeight() / 2);
         }
     }
 
@@ -134,7 +134,7 @@ public class TouchView extends View {
         if (getId() == R.id.TouchViewMovement) {
             mService.setMovementValues(0, 0,this.getWidth() / 2);
         } else if(getId() == R.id.TouchViewTurret) {
-            mService.setTurretValues(0, 0, this.getHeight() / 2, this.getWidth() / 2);
+            mService.setTurretValues(0, 0, this.getWidth() / 2, this.getHeight() / 2);
         }
     }
 
