@@ -190,24 +190,24 @@ class MyBluetoothService {
             if (y <= 0) {
                 if (x > 0) {
                     val = - y - x;
-                } else if (x <= 0) {
+                } else {
                     if (Math.abs(x) >= Math.abs(y)) {
                         val = Math.abs(x);
                     } else if (Math.abs(x) < Math.abs(y)) {
                         val = Math.abs(y);
                     }
                 }
-            }else if (y > 0) {
+            } else {
                 if (x > 0) {
                     if (x > y ) {
                         val = y - x;
-                    } else if (x < y) {
+                    } else {
                         val = x - y;
                     }
-                } else if (x <= 0) {
-                    if (x <= y) {
+                } else {
+                    if (Math.abs(x) < Math.abs(y)) {
                         val = -y;
-                    } else if (x > y) {
+                    } else {
                         val = -(x + 2 * y);
                     }
                 }
