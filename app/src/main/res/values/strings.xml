@@ -3,6 +3,7 @@
     <string name="title_activity_main">Bluetooth Tankki</string>
     <string name="app_button_query_paired">Paired\ndevices</string>
     <string name="app_button_disconnect">Disconnect</string>
+    <string name="app_button_udp_connect">UDP Connect</string>
     <string name="text_not_connected">Not Connected</string>
     <string name="text_send">Send</string>
     <string name="text_close">Close</string>

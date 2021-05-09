@@ -3,15 +3,18 @@ package com.example.simo.bluetoothtesti;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import android.widget.VideoView;
 
 import java.util.Set;
 public class MainActivity extends AppCompatActivity {
@@ -20,8 +23,11 @@ public class MainActivity extends AppCompatActivity {
     ConnectThread cnt;
     MyBluetoothService mService;
     TouchView touchViewMovement, touchViewTurret;
-    Button fireButton, mgButton;
+    Button fireButton, mgButton, udpAcceptButton, udpCancelButton;
+    EditText udpHostTextField;
     ToggleButton laserButton;
+
+    VideoView simpleVideoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,12 @@ public class MainActivity extends AppCompatActivity {
         laserButton = (ToggleButton) findViewById(R.id.LaserToggleButton);
         fireButton = (Button) findViewById(R.id.FireButton);
         mgButton = (Button) findViewById(R.id.MGButton);
+
+        udpAcceptButton = (Button) findViewById(R.id.udpAcceptButton);
+        udpCancelButton = (Button) findViewById(R.id.udpCancelButton);
+        udpHostTextField = (EditText) findViewById(R.id.udpAddressTextField);
+
+        simpleVideoView = (VideoView) findViewById(R.id.videoView);
 
     }
 
@@ -126,5 +138,24 @@ public class MainActivity extends AppCompatActivity {
 
     public void closeButtonClicked(View view) {
         ((ViewGroup) findViewById(R.id.ConstraintLayout)).removeView(findViewById(R.id.ScrollView));
+    }
+
+    public void udpConnectButton(View view) {
+        getLayoutInflater().inflate(R.layout.udpconnector, (ViewGroup) findViewById(R.id.ConstraintLayout), true);
+        udpHostTextField = (EditText) findViewById(R.id.udpAddressTextField);
+    }
+
+    public void udpAcceptClicked(View view) {
+        // initiate a video view
+        simpleVideoView.setVideoURI(Uri.parse("rtsp://" + udpHostTextField.getText() + ":8554/test"));
+        simpleVideoView.start();
+
+        ((ViewGroup) findViewById(R.id.ConstraintLayout)).removeView(findViewById(R.id.udpConnector));
+
+    }
+
+    public void udpCancelClicked(View view) {
+        ((ViewGroup) findViewById(R.id.ConstraintLayout)).removeView(findViewById(R.id.udpConnector));
+
     }
 }
